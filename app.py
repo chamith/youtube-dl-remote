@@ -89,16 +89,23 @@ def cmd_ls(status=3, schedule=1):
         #raise ApiError('GET /tasks/ {}'.format(resp.status_code))
 
     print()
-    print("###### Request Queue ######")
+    print("###### Request Queue on {}:{} ######".format(host, port))
     print()
     for data in resp.json():
-        print('{}'.format(data['url']))
+        print('{} - {}'.format(data['id'], data['url']))
         items = data['items']
         for item in items:
             print(
                 '|-[{}] {}'.format(get_status_text_short(item['status']), item['title']))
         print()
 
+def cmd_rm(id):
+    resp = requests.delete('http://{}:{}/api/requests/{}'.format(host, port, id))
+    if resp.status_code != 200:
+        print("Error posting the request")
+        exit(-1)
+    
+    print("Request with id \'{}\' has been removed successfully.".format(id))
 
 def cmd_add(url, schedule=0):
     payload = {'url': url, 'schedule': schedule}
@@ -115,7 +122,7 @@ def cmd_add(url, schedule=0):
 
 
 def cmd_help():
-    print('Usage:\t{} [options] <command> <arg1> <arg2>'.format(sys.argv[0]))
+    print('Usage:\t{} [options] <command> <arg1> [<arg2>]'.format(sys.argv[0]))
     print('Commands:\n\
         ls  \tshows the queue\n\
         add \tadds a url to the queue')
@@ -145,7 +152,12 @@ if len(args) == 0:
 if args[0] == 'ls':
     cmd_ls()
 elif args[0] == 'add':
-    cmd_add(args[1])
+    if len(args) == 2:
+        cmd_add(args[1])
+    else:
+        cmd_add(args[1], args[2])
+elif args[0] == 'rm':
+    cmd_rm(args[1])
 elif args[0] == "info":
     cmd_info()
 else:
