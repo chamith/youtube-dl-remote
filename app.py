@@ -110,6 +110,14 @@ def cmd_rm(ids):
     
         print("Request with id \'{}\' has been removed successfully.".format(id))
 
+def cmd_clean():
+    resp = requests.delete('http://{}:{}/api/requests'.format(host, port))
+    if resp.status_code != 200:
+        print('Error in request')
+        exit(-1)
+
+    print('completed requests have been removed')
+
 def cmd_add(url, schedule=0): 
     payload = {'url': url, 'schedule': schedule}
     print('payload:\n{}'.format(payload))
@@ -162,6 +170,8 @@ elif args[0] == 'add':
         cmd_add(args[1], args[2])
 elif args[0] == 'rm':
     cmd_rm(args[1:])
+elif args[0] == 'clean':
+    cmd_clean()
 elif args[0] == "info":
     cmd_info()
 else:
