@@ -95,20 +95,24 @@ def cmd_ls(status=3, schedule=1):
         print('{} - {}'.format(data['id'], data['url']))
         items = data['items']
         for item in items:
+            percentage = float(item['progress'])
+            percentage_txt = '{:5.1f}%'.format(percentage) 
             print(
-                '|-[{}] {}'.format(get_status_text_short(item['status']), item['title']))
+                '-[{}] [{}] {}'.format(get_status_text_short(item['status']), percentage_txt, item['title']))
         print()
 
-def cmd_rm(id):
-    resp = requests.delete('http://{}:{}/api/requests/{}'.format(host, port, id))
-    if resp.status_code != 200:
-        print("Error posting the request")
-        exit(-1)
+def cmd_rm(ids):
+    for id in ids:
+        resp = requests.delete('http://{}:{}/api/requests/{}'.format(host, port, id))
+        if resp.status_code != 200:
+            print("Error in request deletion for {}".format(id))
+            exit(-1)
     
-    print("Request with id \'{}\' has been removed successfully.".format(id))
+        print("Request with id \'{}\' has been removed successfully.".format(id))
 
-def cmd_add(url, schedule=0):
+def cmd_add(url, schedule=0): 
     payload = {'url': url, 'schedule': schedule}
+    print('payload:\n{}'.format(payload))
     resp = requests.post(
         'http://{}:{}/api/requests'.format(host, port), json=payload)
 
@@ -157,7 +161,7 @@ elif args[0] == 'add':
     else:
         cmd_add(args[1], args[2])
 elif args[0] == 'rm':
-    cmd_rm(args[1])
+    cmd_rm(args[1:])
 elif args[0] == "info":
     cmd_info()
 else:
